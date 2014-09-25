@@ -6,7 +6,7 @@ package plumkit.dragdrop
      * @history Created on 25.09.2014, 14:32.
      * @author Sergey Smirnov
      */
-    public interface IDropTarget
+    public interface IPKDropTarget
     {
         //----------------------------------------------------------------------------------------------
         //
@@ -14,11 +14,11 @@ package plumkit.dragdrop
         //
         //----------------------------------------------------------------------------------------------
 
-        function canAccept(dragObject:IDragObject):Boolean;
-        function accept(dragObject:IDragObject):void;
+        function canAccept(dragObject:IPKDragObject):Boolean;
+        function accept(dragObject:IPKDragObject):void;
 
-        function onDragEnter(dragObject:IDragObject):void;
-        function onDragExit(dragObject:IDragObject):void;
+        function onDragEnter(dragObject:IPKDragObject):void;
+        function onDragExit(dragObject:IPKDragObject):void;
 
         //----------------------------------------------------------------------------------------------
         //

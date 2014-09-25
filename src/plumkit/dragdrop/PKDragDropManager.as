@@ -3,7 +3,6 @@ package plumkit.dragdrop
     import flash.display.DisplayObject;
     import flash.display.DisplayObjectContainer;
     import flash.display.Stage;
-    import flash.display.Stage;
     import flash.events.MouseEvent;
     import flash.utils.Dictionary;
 
@@ -11,13 +10,15 @@ package plumkit.dragdrop
      * @history Created on 25.09.2014, 14:31.
      * @author Sergey Smirnov
      */
-    public class DragDropManager
+    public class PKDragDropManager
     {
         //----------------------------------------------------------------------------------------------
         //
         //  Class constants
         //
         //----------------------------------------------------------------------------------------------
+
+        public static const DEFAULT_GROUP_ID:String = "default";
 
         //----------------------------------------------------------------------------------------------
         //
@@ -27,9 +28,11 @@ package plumkit.dragdrop
 
         protected var _stage:Stage;
         protected var _dragLayer:DisplayObjectContainer;
+        protected var _currentDropTarget:IPKDropTarget;
+        protected var _currentDragData:IPKDragData;
+
         protected var _dropTargetByDisplayObjectMap:Dictionary;
-        protected var _currentDragObject:IDragObject;
-        protected var _currentDropTarget:IDropTarget;
+        protected var _groupByDropTargetMap:Dictionary;
 
         //----------------------------------------------------------------------------------------------
         //
@@ -45,11 +48,12 @@ package plumkit.dragdrop
         //
         //----------------------------------------------------------------------------------------------
 
-        public function DragDropManager(stage:Stage, dragLayer:DisplayObjectContainer)
+        public function PKDragDropManager(stage:Stage, dragLayer:DisplayObjectContainer)
         {
             _stage = stage;
             _dragLayer = dragLayer;
             _dropTargetByDisplayObjectMap = new Dictionary(true);
+            _groupByDropTargetMap = new Dictionary(true);
 
             _isDraggingNow = false;
         }
@@ -67,9 +71,16 @@ package plumkit.dragdrop
                 return;
             }
 
-            var dropTarget:IDropTarget = _dropTargetByDisplayObjectMap[DisplayObject(event.currentTarget)];
+            var dropTarget:IPKDropTarget = _dropTargetByDisplayObjectMap[DisplayObject(event.currentTarget)];
+            var groupId:String = _groupByDropTargetMap[dropTarget];
+
+            if (_currentDragData.groupId != groupId)
+            {
+                return;
+            }
+
             _currentDropTarget = dropTarget;
-            _currentDropTarget.onDragEnter(_currentDragObject);
+            _currentDropTarget.onDragEnter(_currentDragData.dragObject);
         }
 
         protected function onDropTargetMouseOut(event:MouseEvent):void
@@ -79,16 +90,34 @@ package plumkit.dragdrop
                 return;
             }
 
-            var dropTarget:IDropTarget = _dropTargetByDisplayObjectMap[DisplayObject(event.currentTarget)];
-            _currentDropTarget.onDragExit(_currentDragObject);
+            var dropTarget:IPKDropTarget = _dropTargetByDisplayObjectMap[DisplayObject(event.currentTarget)];
+            var groupId:String = _groupByDropTargetMap[dropTarget];
+
+            if (_currentDragData.groupId != groupId)
+            {
+                return;
+            }
+
+            _currentDropTarget.onDragExit(_currentDragData.dragObject);
             _currentDropTarget = null;
         }
 
         protected function onStageMouseUp(event:MouseEvent):void
         {
+            if (!isDraggingNow)
+            {
+                return;
+            }
+
+            if (!_currentDropTarget)
+            {
+                return;
+            }
+
+            _isDraggingNow = false;
             removeStageListeners();
 
-            if (_currentDropTarget.canAccept(_currentDragObject))
+            if (_currentDropTarget.canAccept(_currentDragData.dragObject))
             {
                 acceptDrop();
             }
@@ -96,6 +125,16 @@ package plumkit.dragdrop
             {
                 failDrop();
             }
+
+            reset();
+        }
+
+        protected function reset():void
+        {
+            _currentDragData.dispose();
+
+            _currentDragData = null;
+            _currentDropTarget = null;
         }
 
         //----------------------------------------------------------------------------------------------
@@ -110,13 +149,13 @@ package plumkit.dragdrop
         //
         //----------------------------------------------------------------------------------------------
 
-        protected function addDropTargetListeners(dropTarget:IDropTarget):void
+        protected function addDropTargetListeners(dropTarget:IPKDropTarget):void
         {
             dropTarget.displayObject.addEventListener(MouseEvent.MOUSE_OVER, onDropTargetMouseOver);
             dropTarget.displayObject.addEventListener(MouseEvent.MOUSE_OUT, onDropTargetMouseOut);
         }
 
-        protected function removeDropTargetListeners(dropTarget:IDropTarget):void
+        protected function removeDropTargetListeners(dropTarget:IPKDropTarget):void
         {
             dropTarget.displayObject.removeEventListener(MouseEvent.MOUSE_OVER, onDropTargetMouseOver);
             dropTarget.displayObject.removeEventListener(MouseEvent.MOUSE_OUT, onDropTargetMouseOut);
@@ -134,13 +173,13 @@ package plumkit.dragdrop
 
         protected function acceptDrop():void
         {
-            _currentDropTarget.accept(_currentDragObject);
-            _currentDragObject.onDropSuccess();
+            _currentDropTarget.accept(_currentDragData.dragObject);
+            _currentDragData.dragObject.onDropSuccess();
         }
 
         protected function failDrop():void
         {
-            _currentDragObject.onDropFail();
+            _currentDragData.dragObject.onDropFail();
         }
 
         //----------------------------------------------------------------------------------------------
@@ -149,25 +188,31 @@ package plumkit.dragdrop
         //
         //----------------------------------------------------------------------------------------------
 
-        public function registerDropTarget(dropTarget:IDropTarget, groupId:String = "default"):void
+        public function registerDropTarget(dropTarget:IPKDropTarget, groupId:String = "default"):void
         {
             //cache drop target by its display object
             _dropTargetByDisplayObjectMap[dropTarget.displayObject] = dropTarget;
+            _groupByDropTargetMap[dropTarget] = groupId;
 
             // add listeners to drop target
             addDropTargetListeners(dropTarget);
         }
 
-        public function unregisterDropTarget(dropTarget:IDropTarget):void
+        public function unregisterDropTarget(dropTarget:IPKDropTarget):void
         {
             // remove drop target listeners
             removeDropTargetListeners(dropTarget);
+
+            delete _dropTargetByDisplayObjectMap[dropTarget.displayObject];
+            delete _groupByDropTargetMap[dropTarget];
         }
 
-        public function startDrag(dragObject:IDragObject, groupId:String = "default"):void
+        public function startDrag(dragData:IPKDragData):void
         {
-            _currentDragObject = dragObject;
-            _currentDragObject.onDragStart();
+            _currentDragData = dragData;
+            _isDraggingNow = true;
+            _currentDragData.dragObject.onDragStart();
+
             addStageListeners();
         }
 
