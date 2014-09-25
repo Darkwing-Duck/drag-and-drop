@@ -1,5 +1,7 @@
 package plumkit.dragdrop
 {
+    import flash.display.DisplayObject;
+
     /**
      * @history Created on 25.09.2014, 14:32.
      * @author Sergey Smirnov
@@ -23,5 +25,7 @@ package plumkit.dragdrop
         //  Accessors
         //
         //----------------------------------------------------------------------------------------------
+
+        function get displayObject():DisplayObject;
     }
 }
