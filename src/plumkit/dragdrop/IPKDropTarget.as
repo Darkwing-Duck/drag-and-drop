@@ -1,6 +1,6 @@
 package plumkit.dragdrop
 {
-    import flash.display.DisplayObject;
+    import flash.display.InteractiveObject;
 
     /**
      * @history Created on 25.09.2014, 14:32.
@@ -14,11 +14,11 @@ package plumkit.dragdrop
         //
         //----------------------------------------------------------------------------------------------
 
-        function canAccept(dragObject:IPKDragObject):Boolean;
-        function accept(dragObject:IPKDragObject):void;
+        function canAccept(dragData:IPKDragData):Boolean;
+        function accept(dragData:IPKDragData):void;
 
-        function onDragEnter(dragObject:IPKDragObject):void;
-        function onDragExit(dragObject:IPKDragObject):void;
+        function onDragEnter(dragData:IPKDragData):void;
+        function onDragExit(dragData:IPKDragData):void;
 
         //----------------------------------------------------------------------------------------------
         //
@@ -26,6 +26,6 @@ package plumkit.dragdrop
         //
         //----------------------------------------------------------------------------------------------
 
-        function get displayObject():DisplayObject;
+        function get interactiveObject():InteractiveObject;
     }
 }

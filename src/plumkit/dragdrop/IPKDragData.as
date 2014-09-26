@@ -25,5 +25,11 @@ package plumkit.dragdrop
         function get dragObject():IPKDragObject;
         function get dragView():DisplayObject;
         function get groupId():String;
+
+        function get viewOffsetX():Number;
+        function set viewOffsetX(value:Number):void;
+
+        function get viewOffsetY():Number;
+        function set viewOffsetY(value:Number):void;
     }
 }
