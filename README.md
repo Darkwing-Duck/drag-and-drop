@@ -1,6 +1,6 @@
-# Plum Kit Drag&Drop Engine #
+# Plum Kit Drag&Drop #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+ActionScript drag&drop framework.
 
 ### What is this repository for? ###
 
