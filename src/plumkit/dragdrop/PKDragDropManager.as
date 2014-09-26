@@ -56,6 +56,7 @@ package plumkit.dragdrop
         {
             _stage = stage;
             _dragLayer = dragLayer;
+            _dragLayer.mouseEnabled = false;
 
             _dropTargets = new <IPKDropTarget>[];
             _dropTargetByInteractiveObjectMap = new Dictionary(true);
@@ -120,21 +121,16 @@ package plumkit.dragdrop
                 return;
             }
 
-            if (!_currentDropTarget)
-            {
-                return;
-            }
-
             _isDraggingNow = false;
             removeStageListeners();
 
-            if (_currentDropTarget.canAccept(_currentDragData))
+            if (!_currentDropTarget || !_currentDropTarget.canAccept(_currentDragData))
             {
-                acceptDrop();
+                failDrop();
             }
             else
             {
-                failDrop();
+                acceptDrop();
             }
 
             reset();
@@ -194,18 +190,24 @@ package plumkit.dragdrop
         {
             _currentDropTarget.accept(_currentDragData);
 
+            finishDrag();
+            _currentDragData.dragObject.onDropSuccess();
+        }
+
+        protected function failDrop():void
+        {
+            finishDrag();
+            _currentDragData.dragObject.onDropFail();
+        }
+
+        protected function finishDrag():void
+        {
             if (_currentDragData.dragView is InteractiveObject)
             {
                 InteractiveObject(_currentDragData.dragView).mouseEnabled = true;
             }
 
             _dragLayer.removeChild(_currentDragData.dragView);
-            _currentDragData.dragObject.onDropSuccess();
-        }
-
-        protected function failDrop():void
-        {
-            _currentDragData.dragObject.onDropFail();
         }
 
         //----------------------------------------------------------------------------------------------
