@@ -134,13 +134,18 @@ package plumkit.dragdrop
 
         protected function onStageMouseMove(event:MouseEvent):void
         {
+            updateDragObjectPosition();
+        }
+
+        protected function updateDragObjectPosition():void
+        {
             if (!_currentDragData.dragView)
             {
                 return;
             }
 
-            _currentDragData.dragView.x = event.stageX + _currentDragData.viewOffsetX;
-            _currentDragData.dragView.y = event.stageY + _currentDragData.viewOffsetY;
+            _currentDragData.dragView.x = _stage.mouseX + _currentDragData.viewOffsetX;
+            _currentDragData.dragView.y = _stage.mouseY + _currentDragData.viewOffsetY;
         }
 
         protected function reset():void
@@ -237,6 +242,7 @@ package plumkit.dragdrop
                     InteractiveObject(dragData.dragView).mouseEnabled = false;
                 }
 
+                updateDragObjectPosition();
                 _dragLayer.addChild(dragData.dragView);
             }
 
