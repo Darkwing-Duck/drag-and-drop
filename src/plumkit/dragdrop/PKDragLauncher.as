@@ -88,6 +88,11 @@ package plumkit.dragdrop
             _currentInteractionObject = null;
         }
 
+        protected function onStageMouseUp(event:MouseEvent):void
+        {
+            removeStageListeners();
+        }
+
         //----------------------------------------------------------------------------------------------
         //
         //  Private Methods
@@ -113,11 +118,13 @@ package plumkit.dragdrop
         protected function addStageListeners():void
         {
             _stage.addEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
+            _stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
         }
 
         protected function removeStageListeners():void
         {
             _stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
+            _stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
         }
 
         //----------------------------------------------------------------------------------------------

@@ -27,5 +27,6 @@ package plumkit.dragdrop
         //----------------------------------------------------------------------------------------------
 
         function get interactiveObject():InteractiveObject;
+        function get groupsAccepted():Vector.<String>;
     }
 }

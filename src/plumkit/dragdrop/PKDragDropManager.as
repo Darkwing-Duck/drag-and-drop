@@ -33,7 +33,6 @@ package plumkit.dragdrop
         protected var _currentDragData:IPKDragData;
 
         protected var _dropTargetByInteractiveObjectMap:Dictionary;
-        protected var _groupByDropTargetMap:Dictionary;
         protected var _dropTargets:Vector.<IPKDropTarget>;
 
         protected var _dragLauncher:PKDragLauncher;
@@ -60,7 +59,6 @@ package plumkit.dragdrop
 
             _dropTargets = new <IPKDropTarget>[];
             _dropTargetByInteractiveObjectMap = new Dictionary(true);
-            _groupByDropTargetMap = new Dictionary(true);
             _dragLauncher = new PKDragLauncher(this, _stage);
             _isDraggingNow = false;
         }
@@ -79,9 +77,8 @@ package plumkit.dragdrop
             }
 
             var dropTarget:IPKDropTarget = _dropTargetByInteractiveObjectMap[InteractiveObject(event.currentTarget)];
-            var groupId:String = _groupByDropTargetMap[dropTarget];
 
-            if (_currentDragData.groupId != groupId)
+            if (dropTarget.groupsAccepted.indexOf(_currentDragData.groupId) < 0)
             {
                 return;
             }
@@ -103,9 +100,8 @@ package plumkit.dragdrop
             }
 
             var dropTarget:IPKDropTarget = _dropTargetByInteractiveObjectMap[InteractiveObject(event.currentTarget)];
-            var groupId:String = _groupByDropTargetMap[dropTarget];
 
-            if (_currentDragData.groupId != groupId)
+            if (dropTarget.groupsAccepted.indexOf(_currentDragData.groupId) < 0)
             {
                 return;
             }
@@ -138,6 +134,11 @@ package plumkit.dragdrop
 
         protected function onStageMouseMove(event:MouseEvent):void
         {
+            if (!_currentDragData.dragView)
+            {
+                return;
+            }
+
             _currentDragData.dragView.x = event.stageX + _currentDragData.viewOffsetX;
             _currentDragData.dragView.y = event.stageY + _currentDragData.viewOffsetY;
         }
@@ -177,12 +178,14 @@ package plumkit.dragdrop
         protected function addStageListeners():void
         {
             _stage.addEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+            _stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onStageMouseUp);
             _stage.addEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
         }
 
         protected function removeStageListeners():void
         {
             _stage.removeEventListener(MouseEvent.MOUSE_UP, onStageMouseUp);
+            _stage.addEventListener(MouseEvent.RIGHT_MOUSE_UP, onStageMouseUp);
             _stage.removeEventListener(MouseEvent.MOUSE_MOVE, onStageMouseMove);
         }
 
@@ -202,6 +205,11 @@ package plumkit.dragdrop
 
         protected function finishDrag():void
         {
+            if (!_currentDragData.dragView)
+            {
+                return;
+            }
+
             if (_currentDragData.dragView is InteractiveObject)
             {
                 InteractiveObject(_currentDragData.dragView).mouseEnabled = true;
@@ -235,11 +243,10 @@ package plumkit.dragdrop
             addStageListeners();
         }
 
-        public function registerDropTarget(dropTarget:IPKDropTarget, groupId:String = "default"):void
+        public function registerDropTarget(dropTarget:IPKDropTarget):void
         {
             //cache drop target by its display object
             _dropTargetByInteractiveObjectMap[dropTarget.interactiveObject] = dropTarget;
-            _groupByDropTargetMap[dropTarget] = groupId;
             _dropTargets.push(dropTarget);
 
             // add listeners to drop target
@@ -252,7 +259,6 @@ package plumkit.dragdrop
             removeDropTargetListeners(dropTarget);
 
             delete _dropTargetByInteractiveObjectMap[dropTarget.interactiveObject];
-            delete _groupByDropTargetMap[dropTarget];
 
             var index:int = _dropTargets.indexOf(dropTarget);
 
@@ -298,7 +304,6 @@ package plumkit.dragdrop
             _dragLauncher.dispose();
 
             _dropTargetByInteractiveObjectMap = null;
-            _groupByDropTargetMap = null;
             _dragLauncher = null;
             _dropTargets = null;
         }
