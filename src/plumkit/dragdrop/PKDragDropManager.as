@@ -78,7 +78,7 @@ package plumkit.dragdrop
 
             var dropTarget:IPKDropTarget = _dropTargetByInteractiveObjectMap[InteractiveObject(event.currentTarget)];
 
-            if (dropTarget.groupsAccepted.indexOf(_currentDragData.groupId) < 0)
+            if (dropTarget.groupsAccepted && dropTarget.groupsAccepted.indexOf(_currentDragData.groupId) < 0)
             {
                 return;
             }
@@ -101,7 +101,7 @@ package plumkit.dragdrop
 
             var dropTarget:IPKDropTarget = _dropTargetByInteractiveObjectMap[InteractiveObject(event.currentTarget)];
 
-            if (dropTarget.groupsAccepted.indexOf(_currentDragData.groupId) < 0)
+            if (dropTarget.groupsAccepted && dropTarget.groupsAccepted.indexOf(_currentDragData.groupId) < 0)
             {
                 return;
             }
@@ -220,7 +220,10 @@ package plumkit.dragdrop
                 InteractiveObject(_currentDragData.dragView).mouseEnabled = true;
             }
 
-            _dragLayer.removeChild(_currentDragData.dragView);
+            if (_currentDragData.dragObject != _currentDragData.dragView)
+            {
+                _dragLayer.removeChild(_currentDragData.dragView);
+            }
         }
 
         //----------------------------------------------------------------------------------------------
